@@ -1,114 +1,160 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Examen Técnico NestJS — API de Administración de Empleados
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST desarrollada con **NestJS** y **TypeScript** para el registro y administración de empleados en memoria, con autenticación **JWT**, control de acceso por roles (**ADMIN**, **CONSULTA**), validaciones con `class-validator` y middlewares propios.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 1. Versiones utilizadas
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Node.js**: `>= 22.x` (probado en `v24.x` / `v26.x`)
+- **Framework**: **NestJS** `v12.0.1` (`@nestjs/core`, `@nestjs/common`, `@nestjs/platform-express`)
+- **Lenguaje**: **TypeScript** `v6.0.2`
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 2. Instrucciones para ejecutar el proyecto
+
+1. **Clonar o ubicarse en el directorio del proyecto**:
+   ```bash
+   cd grupo_bal_api_test
+   ```
+
+2. **Configurar variables de entorno**:
+   Copia el archivo `.env.example` a `.env` (si aún no existe):
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Instalar dependencias e iniciar el servidor en modo desarrollo**:
+   ```bash
+   npm install
+   npm run start:dev
+   ```
+
+El servidor iniciará por defecto en `http://localhost:3000`.
+
+### Scripts adicionales
+- `npm run build` — Compila el proyecto TypeScript.
+- `npm test` — Ejecuta las pruebas unitarias con Vitest.
+- `npm run test:e2e` — Ejecuta las pruebas de integración (E2E).
+- `npm run lint` — Ejecuta el linter (`oxlint`).
+
+---
+
+## 3. Estructura del proyecto
+
+El proyecto sigue una arquitectura modular donde cada módulo agrupa su `controller`, `service`, `module`, `dto` y `entities`:
+
+```text
+src/
+├── main.ts                                  # Punto de entrada y prefijo global /api
+├── app.module.ts                            # Módulo raíz, registro de middlewares, ValidationPipe y filtro global
+├── auth/                                    # Módulo de Autenticación
+│   ├── auth.module.ts                       # Configuración de JwtModule con clave desde .env
+│   ├── auth.controller.ts                   # Endpoint POST /api/auth/login (sin lógica de negocio)
+│   ├── auth.service.ts                      # Usuarios mock y emisión de token JWT
+│   ├── dto/
+│   │   └── login.dto.ts                     # Validación de credenciales de entrada
+│   └── entities/
+│       └── usuario.entity.ts                # Modelo Usuario y enum RolUsuario (ADMIN, CONSULTA)
+├── empleados/                               # Módulo de Empleados
+│   ├── empleados.module.ts                  # Agrupa EmpleadosController y EmpleadosService
+│   ├── empleados.controller.ts              # Recibe peticiones GET, POST y PATCH y delega al service
+│   ├── empleados.service.ts                 # Lógica de negocio y arreglo en memoria (5 empleados mock iniciales)
+│   ├── dto/
+│   │   ├── create-empleado.dto.ts           # Validación de campos obligatorios, enums y fechas YYYY-MM-DD
+│   │   └── update-estado-empleado.dto.ts    # Validación opcional para cambio de estado
+│   └── entities/
+│       └── empleado.entity.ts               # Modelo Empleado y enums Area, Genero y EstadoEmpleado
+└── common/                                  # Middlewares y manejo de errores propios
+    ├── middlewares/
+    │   ├── logger.middleware.ts             # Muestra en consola método, ruta, código HTTP y tiempo en ms
+    │   ├── auth.middleware.ts               # Valida encabezado Authorization: Bearer <token> (401)
+    │   └── roles.middleware.ts              # Valida permisos según rol ADMIN / CONSULTA (403)
+    └── filters/
+        └── http-exception.filter.ts         # Estandariza el formato JSON de todos los errores
 ```
 
-## Compile and run the project
+---
 
+## 4. Dependencias principales
+
+| Paquete | Propósito |
+| --- | --- |
+| `@nestjs/core`, `@nestjs/common`, `@nestjs/platform-express` | Núcleo del framework NestJS y servidor HTTP Express |
+| `@nestjs/jwt` | Generación y verificación de tokens JWT |
+| `@nestjs/config` | Carga de variables de entorno desde archivo `.env` |
+| `class-validator` | Validación declarativa de DTOs de entrada |
+| `class-transformer` | Transformación de payloads a instancias de DTO |
+
+---
+
+## 5. Usuarios Mock
+
+| Usuario | Contraseña | Rol | Permisos |
+| --- | --- | --- | --- |
+| `admin` | `Admin123!` | `ADMIN` | Consultar, registrar y activar/desactivar empleados |
+| `consulta` | `Consulta123!` | `CONSULTA` | Solo consultar empleados (`GET /api/empleados`) |
+
+---
+
+## 6. Ejemplos de peticiones (`curl`)
+
+### 6.1 Iniciar sesión como `ADMIN` (`POST /api/auth/login`)
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "usuario": "admin",
+    "password": "Admin123!"
+  }'
 ```
 
-## Run tests
-
+### 6.2 Iniciar sesión como `CONSULTA` (`POST /api/auth/login`)
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "usuario": "consulta",
+    "password": "Consulta123!"
+  }'
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 6.3 Listar empleados (`GET /api/empleados` — Roles: `ADMIN`, `CONSULTA`)
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl -X GET http://localhost:3000/api/empleados \
+  -H "Authorization: Bearer <TU_TOKEN_JWT>"
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 6.4 Registrar un empleado (`POST /api/empleados` — Rol: `ADMIN`)
+```bash
+curl -X POST http://localhost:3000/api/empleados \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <TOKEN_ADMIN>" \
+  -d '{
+    "nombreCompleto": "Roberto Sánchez Díaz",
+    "area": "TECNOLOGIA",
+    "puesto": "Arquitecto de Software",
+    "genero": "MASCULINO",
+    "fechaEntrada": "2025-03-10",
+    "fechaNacimiento": "1990-05-14"
+  }'
+```
 
-## Observability
+### 6.5 Activar / desactivar empleado (`PATCH /api/empleados/:id/estado` — Rol: `ADMIN`)
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+Alternar automáticamente entre `"Activo"` e `"Inactivo"`:
+```bash
+curl -X PATCH http://localhost:3000/api/empleados/1/estado \
+  -H "Authorization: Bearer <TOKEN_ADMIN>"
+```
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+O especificando explícitamente el nuevo estado en el body:
+```bash
+curl -X PATCH http://localhost:3000/api/empleados/1/estado \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <TOKEN_ADMIN>" \
+  -d '{
+    "estado": "Inactivo"
+  }'
+```
