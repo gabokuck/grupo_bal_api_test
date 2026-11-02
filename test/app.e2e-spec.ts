@@ -22,13 +22,13 @@ describe('API Empleados & Auth (e2e)', () => {
       .post('/api/auth/login')
       .send({ usuario: 'admin', password: 'Admin123!' })
       .expect(200);
-    adminToken = adminLogin.body.access_token;
+    adminToken = adminLogin.body.token;
 
     const consultaLogin = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ usuario: 'consulta', password: 'Consulta123!' })
       .expect(200);
-    consultaToken = consultaLogin.body.access_token;
+    consultaToken = consultaLogin.body.token;
   });
 
   afterEach(async () => {

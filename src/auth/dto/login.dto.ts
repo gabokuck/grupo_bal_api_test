@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
-import { RolUsuario } from '../entities/usuario.entity.js';
 
 export class LoginDto {
   @ApiProperty({
@@ -30,17 +29,5 @@ export class LoginResponseDto {
     description: 'Token JWT para enviar en Authorization: Bearer <token>',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
-  access_token: string;
-
-  @ApiProperty({
-    description: 'Alias del token JWT',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-  })
   token: string;
-
-  @ApiProperty({ example: 'admin' })
-  usuario: string;
-
-  @ApiProperty({ enum: RolUsuario, example: RolUsuario.ADMIN })
-  rol: RolUsuario;
 }
