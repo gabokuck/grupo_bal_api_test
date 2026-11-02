@@ -32,6 +32,7 @@ API REST desarrollada con **NestJS** y **TypeScript** para el registro y adminis
    ```
 
 El servidor iniciará por defecto en `http://localhost:3000`.
+- **Documentación interactiva Swagger UI**: `http://localhost:3000/api/docs`
 
 ### Scripts adicionales
 - `npm run build` — Compila el proyecto TypeScript.
@@ -86,6 +87,7 @@ src/
 | `@nestjs/config` | Carga de variables de entorno desde archivo `.env` |
 | `class-validator` | Validación declarativa de DTOs de entrada |
 | `class-transformer` | Transformación de payloads a instancias de DTO |
+| `@nestjs/swagger` | Documentación interactiva OpenAPI / Swagger en `/api/docs` |
 
 ---
 
