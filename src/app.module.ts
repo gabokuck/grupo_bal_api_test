@@ -39,7 +39,7 @@ import { EmpleadosModule } from './empleados/empleados.module.js';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(LoggerMiddleware).forRoutes('{*path}');
     consumer
       .apply(AuthMiddleware, RolesMiddleware)
       .forRoutes(EmpleadosController);
